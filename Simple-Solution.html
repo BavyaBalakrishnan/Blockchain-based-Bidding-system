@@ -1,0 +1,347 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.3/milligram.min.css">
+  </head>
+  <body class="container" style="padding-top: 3%;">
+    <h2><a href="index.html"></a></h2>
+    <h4 style="color:blue;">Simple Auction</h4>
+
+    <hr />
+
+    <div class="row">
+      <div class="column">
+        <label>Beneficiary</label>
+        <blockquote><p><em id="beneficiary">Loading..</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>Raised</label>
+        <blockquote><p><em><span id="raised">Loading..</span><br />ETH</em></p></blockquote>
+      </div>
+      <div class="column">
+        <label>Timeleft</label>
+        <blockquote><p><em id="timeleft">Loading..</em><br />seconds</p></blockquote>
+      </div>
+      <div class="column">
+        <label>Highest Bidder</label>
+        <blockquote><p><em><span id="highestBidder"></span><br />
+        <span id="highestBid"></span> ETH</em></p></blockquote>
+      </div>
+      <div class="column">
+        <label>Your Account<label>
+        <blockquote><p><em id="accountAddress">Loading..</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>Balance</label>
+        <blockquote><p><em id="accountBalance">Loading..</em><br />ETH</p></blockquote>
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+      <div class="column column-33">
+        <label>From Account</label>
+        <select id="bidAccount">
+        </select>
+      </div>
+      <div class="column column-25">
+        <label>Bid Amount</label>
+        <input type="number" id="bidAmount" placeholder="28300 ether">
+      </div>
+      <div class="column column-25">
+        <label><br /></label>
+        <button id="makeBid">Bid</button>
+      </div>
+    </div>
+
+    <hr />
+
+    <button id="endAuction" >End Auction</button>
+
+    <br /><br />
+
+    <div id="response"></div>
+
+    <script type="text/javascript" src="ethereumjs-testrpc.js"></script>
+    <script type="text/javascript" src="ethjs.js"></script>
+	 
+    <script type="text/javascript">
+		//javascript starts here
+	//to interact with testchain
+      var eth = new Eth(TestRPC.provider()); 
+//updates user interface, use test chain to update UI
+      var el = function(id){ return document.querySelector(id); };
+
+      
+      // uncomment to enable MetaMask support:
+  /*    if (typeof window.web3 !== 'undefined' && typeof window.web3.currentProvider !== 'undefined') {
+        eth.setProvider(window.web3.currentProvider);
+      } else {
+        eth.setProvider(provider); // set to TestRPC if not available
+      }
+      
+*/
+		
+      eth.accounts().then(function(accounts) {
+		  accounts.forEach(function (address) {
+			//change 1
+          bidAccount.innerHTML += '<option>'
+            + address + '</option>';
+        });
+
+        el('#accountAddress').innerHTML = accounts[0].substr(0, 12);
+
+        var SimpleAuctionBytecode = '608060405234801561001057600080fd5b506040516040806107258339810180604052810190808051906020019092919080519060200190929190505050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550426001819055508160028190555050506106898061009c6000396000f30060806040526004361061008e576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680631998aeef146100935780632a24f46c1461009d57806338af3eed146100b45780633ccfd60b1461010b5780634f245ef71461013a57806391f9015714610165578063d074a38d146101bc578063d57bde79146101e7575b600080fd5b61009b610212565b005b3480156100a957600080fd5b506100b261039e565b005b3480156100c057600080fd5b506100c96104db565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561011757600080fd5b50610120610500565b604051808215151515815260200191505060405180910390f35b34801561014657600080fd5b5061014f610625565b6040518082815260200191505060405180910390f35b34801561017157600080fd5b5061017a61062b565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156101c857600080fd5b506101d1610651565b6040518082815260200191505060405180910390f35b3480156101f357600080fd5b506101fc610657565b6040518082815260200191505060405180910390f35b6002546001540142111561022557600080fd5b6004543411151561023557600080fd5b6000600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff161415156102e95760045460056000600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825401925050819055505b33600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550346004819055507ff4757a49b326036464bec6fe419a4ae38c8a02ce3e68bf0809674f6aab8ad3003334604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a1565b60025460015401421115156103b257600080fd5b600660009054906101000a900460ff16156103cc57600080fd5b6001600660006101000a81548160ff0219169083151502179055507fdaec4582d5d9595688c8c98545fdd1c696d41c6aeaeb636737e84ed2f5c00eda600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16600454604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a16000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc6004549081150290604051600060405180830381858888f1935050505015156104d957600080fd5b565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600080600560003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050600081111561061c576000600560003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055503373ffffffffffffffffffffffffffffffffffffffff166108fc829081150290604051600060405180830381858888f19350505050151561061b5780600560003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000208190555060009150610621565b5b600191505b5090565b60015481565b600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60025481565b600454815600a165627a7a723058208ea3632dcd64ab1eca2783624055293ea24149c1e06d3d14c7a159fa32f1f5f70029';
+        var SimpleAuctionABI = [
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "auctionEnd",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "bid",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"name": "_biddingTime",
+				"type": "uint256"
+			},
+			{
+				"name": "_beneficiary",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "bidder",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "HighestBidIncreased",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "winner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "AuctionEnded",
+		"type": "event"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "auctionStart",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "beneficiary",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "biddingTime",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "highestBid",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "highestBidder",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+        var SimpleAuction = eth.contract(SimpleAuctionABI, SimpleAuctionBytecode, { from: accounts[0], gas: 3000000 });//Creates a new contract instance with all its methods and events defined in its json interface object.
+        var simpleAuctionInstance;
+        var beneficiary = accounts[0];
+        var biddingTime = 100; // in seconds
+		  var timeleft = 0;
+        // poll for new auction data
+        var auctionInterval = setInterval(function updateAuctionHTML() {
+          if (!simpleAuctionInstance) { return; }
+	//updates all the data on UI
+          eth.getBalance(accounts[0]).then(function(balance){
+            el('#accountBalance').innerHTML = Eth.fromWei(balance, 'ether');
+          });
+          eth.getBalance(simpleAuctionInstance.address).then(function(auctionBalance){
+            el('#raised').innerHTML = Eth.fromWei(auctionBalance, 'ether');
+          });
+          simpleAuctionInstance.beneficiary().then(function(beneficiary){
+            el('#beneficiary').innerHTML = beneficiary[0].substr(0, 12);
+          });
+          simpleAuctionInstance.highestBidder().then(function(highestBidder){
+            el('#highestBidder').innerHTML = highestBidder[0].substr(0, 12);
+          });
+          simpleAuctionInstance.highestBid().then(function(highestBid){
+            el('#highestBid').innerHTML = Eth.fromWei(highestBid[0], 'ether');
+          });
+          simpleAuctionInstance.auctionStart().then(function(auctionStart){
+            simpleAuctionInstance.biddingTime().then(function(biddingTime){
+              timeleft = (auctionStart[0].add(biddingTime[0]))
+              .sub(new Eth.BN((new Date()).getTime() / 1000));
+
+              el('#timeleft').innerHTML = timeleft.toString(10);
+
+              // time left is less than or equal to (lte) 0
+              if (timeleft.lte(0)) {
+				  clearInterval(auctionInterval);
+				  var input = document.querySelector('#endAuction');
+                  input.removeAttribute('disabled');
+				  //auctionInterval = 0;
+                  //document.getElementById('endAuction').disabled = false;
+			//	el('#endAuction').disabled = false;
+
+              }
+            });
+          });
+		}, 600);
+		  function stop() {
+              if (timeleft.lte(0)) {
+                  clearInterval(auctionInterval);
+                  auctionInterval = 0;
+                  el('#endAuction').removeAttr('disabled');
+              }
+          }
+
+        SimpleAuction.new(biddingTime, beneficiary, function(deployError, deployTxHash){
+          if (deployError) {
+            el('#response').innerHTML = 'Hmm, there was an error: ' + String(deployError);
+          }
+
+          var checkTransaction = setInterval(function(){
+            eth.getTransactionReceipt(deployTxHash).then(function(receipt){
+              if (receipt) {
+				  clearInterval(checkTransaction);
+				  checkTransaction = 0;
+                simpleAuctionInstance = SimpleAuction.at(receipt.contractAddress);
+
+                el('#makeBid').addEventListener('click', function(){
+                  var bidTxObject = {
+                    from: el('#bidAccount').value,
+                    value: Eth.toWei(el('#bidAmount').value, 'ether'),
+                  };
+
+                  el('#response').innerHTML = 'Placing bid now..';
+
+                  simpleAuctionInstance.bid(bidTxObject, function(bidError, bidResult){
+                    if (bidError) {
+                      el('#response').innerHTML = 'There was an error' + String(bidError);
+                    } else {
+                      el('#response').innerHTML = 'Successful. Making bid with tx hash: ' + String(bidResult);
+                    }
+                  });
+                });
+
+                el('#endAuction').addEventListener('click', function(){
+                  el('#response').innerHTML = 'Ending auction...';
+
+                    simpleAuctionInstance.auctionEnd(function(endError, endResult){
+                    if (endError) {
+                      el('#response').innerHTML = 'Hmm, there was an error' + String(endError);
+                    } else {
+                      el('#response').innerHTML = 'Ending auction with tx hash: ' + String(endResult);
+                    }
+                  });
+                });
+              }
+            });
+          }, 400);
+        });
+      });
+    </script>
+
+    
